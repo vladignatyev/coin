@@ -135,7 +135,7 @@ def train_price_volume_sliding_window(network, training_set, data_dimension=2, p
 
 if __name__ == '__main__':
 	price_index = 0
-	history_interval = 5
+	history_interval = 30
 
 	ticks = load_all_ticks()
 
@@ -150,14 +150,17 @@ if __name__ == '__main__':
 	
 	days = validate_start
 
-	for i in range(0, validate_start): # 5 - prediction interval
+	for i in range(0, validate_start):
 		writer.writerow([i+1, 0.0])
 
-	while days < len(ticks)-history_interval:
-		sample = ticks[days:days+history_interval]
+
+	wnd = sliding_window(history_interval, ticks[validate_start:])
+
+	while True:
+
+		sample = wnd.next()
 		normalized, mins, maxs = normalizeWindow(sample)
-		print "Normalized"
-		print normalized
+
 		flattened = [item for sublist in normalized for item in sublist]
 		response = network.activate(flattened)
 
@@ -167,9 +170,9 @@ if __name__ == '__main__':
 		for v in forecast_prices:
 			prices_output.append(float(v))
 
-		for i in range(0,len(prices_output)):
-			writer.writerow([days+i+1, prices_output[i]])
+		# for i in range(0,len(prices_output)):
+		writer.writerow([days+1, prices_output[3]])
 
-		days += history_interval
+		days += 1
 
 
