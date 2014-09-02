@@ -8,13 +8,13 @@ from bot.training import days
 
 n = FeedForwardNetwork()
 
-inLayer = LinearLayer(10)
+inLayer = SigmoidLayer(10)
 hiddenLayers = []
 
 for i in range(0, 3):
-    hiddenLayers.append(LinearLayer(10))
+    hiddenLayers.append(SigmoidLayer(10))
 
-outLayer = LinearLayer(5)
+outLayer = SigmoidLayer(5)
 
 n.addInputModule(inLayer)
 for layer in hiddenLayers:

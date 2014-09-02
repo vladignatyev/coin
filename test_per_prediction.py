@@ -13,8 +13,8 @@ n = FeedForwardNetwork()
 inLayer = LinearLayer(10)
 hiddenLayers = []
 
-for i in range(0, 3):
-    hiddenLayers.append(LinearLayer(10))
+for i in range(0, 2):
+    hiddenLayers.append(SigmoidLayer(3))
 
 outLayer = LinearLayer(5)
 
@@ -129,9 +129,9 @@ for day in range(0, 100):
 
 with open('predictions.csv', 'wb') as output_file:
     writer = csv.writer(output_file, delimiter=',', quotechar='\"', quoting=csv.QUOTE_MINIMAL)
-
+    
     for i in range(0, 18):
-        trainer.trainUntilConvergence(validationProportion=0.25, maxEpochs=100, verbose=False)
+        trainer.trainUntilConvergence(validationProportion=0.55, maxEpochs=1000, verbose=False)
 
         ticks = map(lambda x: data.next(), range(0, 5))
 
