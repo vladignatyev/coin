@@ -1,4 +1,5 @@
 __author__ = 'serge'
+import csv
 from pybrain.structure import LinearLayer, SigmoidLayer
 from pybrain.structure import FeedForwardNetwork
 from pybrain.structure import FullConnection
@@ -83,7 +84,7 @@ def ticks_to_inputs_outputs(ticks, ticks_forecast):
     return [inputs, forecast]
 
 
-def predict_next_five(ticks, ticks_future):
+def predict_next_five(ticks, ticks_future, writer):
     window = []
     max_price = 0.0
     min_price = float('inf')
@@ -112,11 +113,11 @@ def predict_next_five(ticks, ticks_future):
     window[7] = normalize(window[7], max_volume, min_volume)
     window[9] = normalize(window[9], max_volume, min_volume)
     output = n.activate(window)
-    print denormalize(output[0], max_price, min_price), ticks_future[0][0]
-    print denormalize(output[1], max_price, min_price), ticks_future[1][0]
-    print denormalize(output[2], max_price, min_price), ticks_future[2][0]
-    print denormalize(output[3], max_price, min_price), ticks_future[3][0]
-    print denormalize(output[4], max_price, min_price), ticks_future[4][0]
+
+    for j in range(0, 5):
+        prediction = denormalize(output[j], max_price, min_price)
+        print prediction, ticks_future[j][0]
+        writer.writerow([ticks_future[j][2], prediction, ticks_future[j][0]])
 
 last_five = []
 
@@ -126,14 +127,17 @@ for day in range(0, 100):
 
     DS.appendLinked(*ticks_to_inputs_outputs(ticks, last_five))
 
-for i in range(0, 3):
-    trainer.trainUntilConvergence(validationProportion=0.25, maxEpochs=100, verbose=False)
+with open('predictions.csv', 'wb') as output_file:
+    writer = csv.writer(output_file, delimiter=',', quotechar='\"', quoting=csv.QUOTE_MINIMAL)
 
-    ticks = map(lambda x: data.next(), range(0, 5))
+    for i in range(0, 18):
+        trainer.trainUntilConvergence(validationProportion=0.25, maxEpochs=100, verbose=False)
 
-    predict_next_five(last_five, ticks)
+        ticks = map(lambda x: data.next(), range(0, 5))
 
-    DS.appendLinked(*ticks_to_inputs_outputs(last_five, ticks))
+        predict_next_five(last_five, ticks, writer)
 
-    last_five = ticks
+        DS.appendLinked(*ticks_to_inputs_outputs(last_five, ticks))
+
+        last_five = ticks
 
